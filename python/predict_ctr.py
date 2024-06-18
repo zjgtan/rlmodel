@@ -50,6 +50,14 @@ def eval(model, dataset):
 
     print("test: ", click_auc)
 
+def predict(model, dataset, out_file):
+    with open(out_file, "w") as fout:
+        for batch in tqdm(dataset):
+            output_logits = model(batch)
+
+
+
+
 if __name__ == "__main__":
     camp = sys.argv[1]
     batch_size = 10000
@@ -62,4 +70,5 @@ if __name__ == "__main__":
     test_set = tf.data.TFRecordDataset(["../data/{}/test.yzx.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
 
     train_epoch(net, train_set, optimizer)
-    eval(net, test_set)  
+    #eval(net, test_set)  
+    predict(net, train_set, "../data/{}/train.theta.txt".format(camp))
