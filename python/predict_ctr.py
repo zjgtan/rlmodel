@@ -49,8 +49,8 @@ if __name__ == "__main__":
     net = LR(560871, 1)
     optimizer = tf.keras.optimizers.Adam()
     # 定义输入输出数据流
-    train_set = tf.data.TFRecordDataset(["./data/{}/train.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
-    test_set = tf.data.TFRecordDataset(["../data/{}/test.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
+    train_set = tf.data.TFRecordDataset(["./data/{}/train.yzx.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
+    test_set = tf.data.TFRecordDataset(["../data/{}/test.yzx.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
 
     train_epoch(net, train_set, optimizer)
     eval(net, test_set)  
