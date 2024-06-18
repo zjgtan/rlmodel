@@ -3,7 +3,7 @@ from sklearn.metrics import log_loss
 import numpy as np
 from lr import LR
 import tensorflow as tf
-import tqdm
+from tqdm import tqdm
 import sys
 
 def parse_example(record):
