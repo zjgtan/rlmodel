@@ -12,11 +12,17 @@ if __name__ == "__main__":
             for line in tqdm(fin):
                 fields = line.rstrip().split(" ")
                 clk = fields[0]
-                feat = [int(fields[i].split(":")[0]) for i in range(2, len(fields))]
+                feature_dict = {}
+                for i in range(2, len(fields)):
+                    slot, feat, _ = fields[i].split(":")
+                    feature_dict.setdefault(slot, [])
+                    feature_dict[slot].append(int(feat))
 
                 tf_record = {}
                 tf_record["click"] = tf.train.Feature(float_list=tf.train.FloatList(value=[int(clk)]))
-                tf_record["feat"] = tf.train.Feature(int64_list=tf.train.Int64List(value=feat))
+
+                for slot, feat in feature_dict.items():
+                    tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=feat))
 
                 example = tf.train.Example(features=tf.train.Features(feature=tf_record))
                 tfd_writer.write(example.SerializeToString())
