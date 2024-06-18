@@ -8,9 +8,11 @@ import sys
 
 def parse_example(record):
     schema = {}
-    schema["feat"] = tf.io.VarLenFeature(tf.int64)
+    schema["feat"] = tf.io.RaggedFeature(tf.int64)
     schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
     parsed_example = tf.io.parse_single_example(record, schema)
+
+    parsed_example['feat'] = tf.ragged.stack([parsed_example['feat']], axis=0)
     return parsed_example
 
 def train_epoch(model, dataset, optimizer):
