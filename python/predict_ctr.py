@@ -3,17 +3,22 @@ from sklearn.metrics import log_loss
 import numpy as np
 from lr import LR
 from fm import FM
+from dnn import DNN
 import tensorflow as tf
 from tqdm import tqdm
 import sys
+from feature_column import *
 
 def parse_example(record):
     schema = {}
-    schema["feat"] = tf.io.RaggedFeature(tf.int64)
     schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
+    for idx in range(27):
+        schema[str(idx)] = tf.io.RaggedFeature(tf.int64)
+
     parsed_example = tf.io.parse_single_example(record, schema)
 
-    parsed_example['feat'] = tf.ragged.stack([parsed_example['feat']], axis=0)
+    for idx in range(27):
+        parsed_example[str(idx)] = tf.ragged.stack([parsed_example[str(idx)]], axis=0)
     return parsed_example
 
 def train_epoch(model, dataset, optimizer):
@@ -49,7 +54,8 @@ if __name__ == "__main__":
     camp = sys.argv[1]
     batch_size = 10000
     # 定义模型结构
-    net = FM(32, 560871)
+    feature_map = dict((str(idx), VarLenColumn(str(idx), "general")) for idx in range(27))
+    net = DNN(feature_map, 560871, 32, [256, 128])
     optimizer = tf.keras.optimizers.Adam()
     # 定义输入输出数据流
     train_set = tf.data.TFRecordDataset(["./data/{}/train.yzx.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
