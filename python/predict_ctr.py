@@ -2,6 +2,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.metrics import log_loss
 import numpy as np
 from lr import LR
+from fm import FM
 import tensorflow as tf
 from tqdm import tqdm
 import sys
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     camp = sys.argv[1]
     batch_size = 10000
     # 定义模型结构
-    net = LR(560871, 1)
+    net = FM(32, 560871)
     optimizer = tf.keras.optimizers.Adam()
     # 定义输入输出数据流
     train_set = tf.data.TFRecordDataset(["./data/{}/train.yzx.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
