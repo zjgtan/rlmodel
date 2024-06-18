@@ -1,5 +1,6 @@
 import tensorflow as tf
 import sys
+from tqdm import tqdm
 
 
 if __name__ == "__main__":
@@ -8,7 +9,7 @@ if __name__ == "__main__":
 
     with tf.io.TFRecordWriter(tfr_file) as tfd_writer:
         with open(yzx_file) as fin:
-            for line in fin:
+            for line in tqdm(fin):
                 fields = line.rstrip().split(" ")
                 clk = fields[0]
                 feat = [int(fields[i].split(":")[0]) for i in range(2, len(fields))]
