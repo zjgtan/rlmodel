@@ -5,9 +5,7 @@ from lr import LR
 import tensorflow as tf
 import tqdm
 
-
-
-def parse_example(record, feature_map):
+def parse_example(record):
     schema = {}
     schema["feat"] = tf.io.FixedLenFeature((1, ), tf.int64)
     schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
@@ -15,28 +13,16 @@ def parse_example(record, feature_map):
     return parsed_example
 
 def train_epoch(model, dataset, optimizer):
-
-    idx = 0
     for batch in tqdm(dataset):
         with tf.GradientTape() as tape:
             output_logits = model(batch)
-            click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=output_logits[0]))
-            #conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
-            try:
-                click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(output_logits[0]))
-                conversion_auc = 0
-                #conversion_auc = roc_auc_score(batch["conversion"], tf.nn.sigmoid(conversion_logits))
-            except:
-                click_auc, conversion_auc = 0, 0
-
-            #loss = click_loss + conversion_loss
-            loss = click_loss
+            loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=output_logits))
+            click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(output_logits[0]))
 
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-        if idx % 100 == 0:
-            print(loss, click_auc, conversion_auc)
+        print(loss, click_auc)
 
         idx += 1
 
@@ -47,10 +33,8 @@ if __name__ == "__main__":
     optimizer = tf.keras.optimizers.Adam()
 
     # 定义输入输出数据流
-    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=yaml_config["batch_size"]))
-    alicpp_test_set = tf.data.TFRecordDataset(["../mtl/test.tfrecord"]).map(lambda record: parse_example(record, feature_map)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=yaml_config["batch_size"]))
+    train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=yaml_config["batch_size"]))
+    test_set = tf.data.TFRecordDataset(["../mtl/test.tfrecord"]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=yaml_config["batch_size"]))
 
-    for epoch in range(yaml_config["epoch"]):
-        train_epoch(net, alicpp_train_set, optimizer)
-
-    eval(net, alicpp_test_set)  
+    train_epoch(net, train_set, optimizer)
+    eval(net, test_set)  
