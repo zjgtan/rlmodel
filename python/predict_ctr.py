@@ -55,7 +55,7 @@ if __name__ == "__main__":
     batch_size = 10000
     # 定义模型结构
     feature_map = dict((str(idx), VarLenColumn(str(idx), "general")) for idx in range(27))
-    net = DNN(feature_map, 560871, 32, [256, 128])
+    net = DNN(feature_map, 560871, 32, [256, 128, 1])
     optimizer = tf.keras.optimizers.Adam()
     # 定义输入输出数据流
     train_set = tf.data.TFRecordDataset(["./data/{}/train.yzx.tfrecord".format(camp)]).map(lambda record: parse_example(record)).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))

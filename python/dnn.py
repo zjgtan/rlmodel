@@ -51,4 +51,4 @@ class DNN(keras.Model):
         embedding_dict = self.embedding_lookup(inputs)
         concated_embedding = self.concat_embedding(embedding_dict)
         logits = self.mlp(concated_embedding)
-        return [logits]
+        return logits
