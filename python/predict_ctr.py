@@ -24,7 +24,7 @@ def parse_example(record):
 def train_epoch(model, dataset, optimizer):
     for batch in tqdm(dataset):
         with tf.GradientTape() as tape:
-            output_logits = model(batch["feat"])
+            output_logits = model(batch)
             loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=output_logits))
             click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(output_logits[0]))
 
@@ -38,7 +38,7 @@ def eval(model, dataset):
     click_logits_list, click_list = [], []
 
     for batch in tqdm(dataset):
-        output_logits = model(batch["feat"])
+        output_logits = model(batch)
         click_logits_list.append(output_logits)
         click_list.append(batch["click"])
 
