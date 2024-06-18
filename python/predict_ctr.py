@@ -8,7 +8,7 @@ import sys
 
 def parse_example(record):
     schema = {}
-    schema["feat"] = tf.io.FixedLenFeature((1, ), tf.int64)
+    schema["feat"] = tf.io.VarLenFeature(tf.int64)
     schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
     parsed_example = tf.io.parse_single_example(record, schema)
     return parsed_example
